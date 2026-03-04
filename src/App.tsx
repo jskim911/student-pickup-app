@@ -127,7 +127,7 @@ export default function App() {
         setUsers(fetchedUsers);
 
         // INITIALIZE ADMIN IF NOT EXISTS
-        if (fetchedUsers.length > 0 && !fetchedUsers.some(u => u.username === "jskim119")) {
+        if (!fetchedUsers.some(u => u.username === "jskim119")) {
           await addDoc(collection(db, "users"), {
             username: "jskim119",
             password: "6748!!",
@@ -147,7 +147,18 @@ export default function App() {
   // AUTH LOGIC
   const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { username, password } = authForm;
+    const username = authForm.username.trim();
+    const password = authForm.password.trim();
+
+    // HARDCODED ADMIN CHECK (Fallback for initial setup)
+    if (username === "jskim119" && password === "6748!!") {
+      const adminUser: User = { id: "admin-fixed", username: "jskim119", role: "admin", approved: true };
+      setCurrentUser(adminUser);
+      setToastMessage("관리자 계정으로 접속되었습니다.");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+      return;
+    }
 
     if (authMode === "login") {
       const user = users.find(u => u.username === username && u.password === password);
